@@ -4,18 +4,34 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <pthread.h>
 
 #define PORT 2222
 
-int main( int argc, char *argv[] ){
-	int server_fd, new_socket, valread;
+void *handleNewConnection(void *vargp){
+    int valread;
+    int new_socket = *(int*)vargp;
+    char hello_msg[] = "Hello, please send USER command for login\n";
+    send(new_socket , hello_msg , strlen(hello_msg) , 0 );
+        printf("Accepted new connection, hello msg sent\n");
+        int cont = 1;
+        while (cont){
+            char buffer[1024] = {0};
+            valread = read( new_socket , buffer, 1024);
+            printf("Received: %s\n",buffer );
+        }
+    return NULL;
+}
+
+int main(int argc, char *argv[]){
+	int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1;
     int addr_len=sizeof(address);
-    char buffer[1024] = {0};
-    char hello_msg[] = "Hello, please send USER command for login";
+    
+    
     if (argc > 1) {
-		printf("Too many arguments provided. No args needed.\n");
+		printf("Too many arguments provided. Unable to interpret \"%s\"\n", argv[1]);
 		return 1;
 	}
 	
@@ -54,18 +70,15 @@ int main( int argc, char *argv[] ){
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    
     while (1){
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, 
-                        (socklen_t*)&addr_len))<0)
+                            (socklen_t*)&addr_len))<0)
         {
-            perror("accept");
-            exit(EXIT_FAILURE);
+                perror("accept");
+                exit(EXIT_FAILURE);
         }
-        valread = read( new_socket , buffer, 1024);
-        printf("%s\n",buffer );
-        send(new_socket , hello_msg , strlen(hello_msg) , 0 );
-        printf("Hello message sent\n");
+        pthread_t thread_id;
+        pthread_create(&thread_id, NULL, handleNewConnection, &new_socket);
     }
     return 0;
 }

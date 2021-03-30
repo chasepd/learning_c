@@ -59,7 +59,7 @@ all: $(BIN_PATH)/$(BIN_NAME)
 # Creation of the executable
 $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 	@echo "Linking: $@"
-	$(CXX) $(OBJECTS) -o $@ ${LIBS}
+	$(CXX) $(OBJECTS) -pthread -o $@ ${LIBS}
 
 # Add dependency files, if they exist
 -include $(DEPS)
@@ -70,3 +70,6 @@ $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
+	
+run: default_target
+	./$(BIN_NAME)
