@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <pthread.h>
 
 #define DEFAULT_PORT 2222
 #define TRUE 1
@@ -76,10 +77,10 @@ int main( int argc, char *argv[] ){
     
     while (TRUE){
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, 
-                        (socklen_t*)&addr_len))<0)
+                            (socklen_t*)&addr_len))<0)
         {
-            perror("accept");
-            exit(EXIT_FAILURE);
+                perror("accept");
+                exit(EXIT_FAILURE);
         }
 
         handle_connection(new_socket);
