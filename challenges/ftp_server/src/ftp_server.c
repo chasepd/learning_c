@@ -1,25 +1,9 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <pthread.h>
 
-#define DEFAULT_PORT 2222
-#define TRUE 1
-#define FALSE 0
+#include "../inc/ftp_server.h"
 
-const char hello_msg[] = "Hello, please send USER command for login";
+const char hello_msg[] = "Hello, please send command. Send HELP for list of commands.";
 
-void handle_connection(int new_socket){
-    int value_read;
-    char buffer[1024] = {0};
-    value_read = read(new_socket, buffer, 1024);
-    printf("%s\n", buffer);
-    send(new_socket, hello_msg, strlen(hello_msg), 0 );
-    printf("Hello message sent\n");
-}
+const char goodbye_msg[] = "BYE";
 
 int main( int argc, char *argv[] ){
 	int server_fd, new_socket, port;
@@ -38,7 +22,7 @@ int main( int argc, char *argv[] ){
         port = DEFAULT_PORT;
     }
 
-    printf("Starting on port %i", port);
+    printf("Starting on port %i\n", port);
 	
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0){
         perror("Could not create socket");
@@ -84,6 +68,30 @@ int main( int argc, char *argv[] ){
         }
 
         handle_connection(new_socket);
+        close(new_socket);
     }
     return 0;
+}
+
+void handle_connection(int new_socket){
+    int value_read;
+    char buffer[1024] = {0};
+    value_read = read(new_socket, buffer, 1024);
+    printf("%s\n", buffer);
+    send(new_socket, hello_msg, strlen(hello_msg), 0 );
+    printf("Hello message sent\n");
+
+    while(TRUE){
+        value_read = read(new_socket, buffer, 1024);
+        int result = handle_command(buffer);
+
+        if(result == EXIT_COMMAND){
+            send(new_socket, goodbye_msg, strlen(goodbye_msg), 0);
+            break;
+        }
+    }
+}
+
+int handle_command(char message[1024]){
+    return EXIT_COMMAND;
 }
