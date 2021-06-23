@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 int main(){
     __time_t t;
@@ -23,7 +24,14 @@ int main(){
             break;
         }
         else{
-            printf("Incorrect guess. You've used %i out of 5 guesses.\n", count + 1);
+            char result[7];
+            if(guess > correct_number){
+                strcpy(result, "lower");
+            }
+            else{
+                strcpy(result, "higher");
+            }
+            printf("Incorrect guess. The correct number is %s than that. You've used %i out of 5 guesses.\n", result, count + 1);
             if(count == 4){
                 printf("GAME OVER. The correct number was %i.\n", correct_number);
             }
